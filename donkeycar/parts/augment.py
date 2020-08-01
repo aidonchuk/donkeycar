@@ -127,7 +127,7 @@ def augment_pil_image(img, shadow_images=None, do_warp_persp=False):
         augmented image
     """
 
-    img = Image.open("/home/alex/Downloads/antidote.jpg")
+    #img = Image.open("/home/alex/Downloads/antidote.jpg")
 
     use_albu = True
     transform = albu_transform(p=1)
