@@ -17,3 +17,4 @@ dependencies:
   - moviepy
   - paho-mqtt
   - PrettyTable
+  - albumentations
