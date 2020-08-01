@@ -10,7 +10,10 @@ import random
 import numpy as np
 from PIL import Image
 from PIL import ImageEnhance
-from albumentations import Compose, OneOf, IAAAdditiveGaussianNoise, GaussNoise, ISONoise, Blur, MotionBlur, MedianBlur
+from albumentations import Compose, OneOf, IAAAdditiveGaussianNoise, GaussNoise, ISONoise, Blur, MotionBlur, MedianBlur, \
+    CLAHE, IAASharpen, IAAEmboss, RandomBrightnessContrast, RGBShift, ImageCompression, ChannelShuffle, InvertImg, \
+    HueSaturationValue, RandomSunFlare, RandomSnow, RandomShadow, RandomRain, RandomFog, ChannelDropout, CoarseDropout, \
+    ShiftScaleRotate, OpticalDistortion, ElasticTransform, GridDistortion
 
 '''
     find_coeffs and persp_transform borrowed from:
@@ -68,16 +71,18 @@ def augment_image(np_img, shadow_images=None, do_warp_persp=False):
 def albu_transform(p=1):
     return Compose([
         OneOf([
-            # CLAHE(),
-            # IAASharpen(),
-            # IAAEmboss(),
-            # RandomBrightnessContrast(),
-            # RGBShift(),
-            # ImageCompression(),
+            CLAHE(),
+            IAASharpen(),
+            IAAEmboss(),
+            RandomBrightnessContrast(),
+            RGBShift(),
+            ImageCompression(),
             # RandomGamma(),
-            # ChannelShuffle(),
-            # InvertImg(),
-            # HueSaturationValue()
+            ChannelShuffle(),
+            InvertImg(),
+            HueSaturationValue(),
+            ChannelDropout(),
+            CoarseDropout(),
         ], p=0.3),
         OneOf([
             IAAAdditiveGaussianNoise(),
@@ -88,7 +93,25 @@ def albu_transform(p=1):
             Blur(),
             MotionBlur(),
             MedianBlur(),
-        ], p=0.2)
+        ], p=0.2),
+        OneOf([
+            GridDistortion(),
+            ElasticTransform(),
+            OpticalDistortion(),
+        ], p=0.2),
+        OneOf([
+            RandomFog(),
+            RandomRain(),
+            RandomShadow(),
+            RandomSnow(),
+            RandomSunFlare()
+        ], p=0.2),
+        OneOf([
+            IAAAdditiveGaussianNoise(),
+            GaussNoise(),
+            ISONoise()
+        ], p=0.2),
+        ShiftScaleRotate(shift_limit=0.1, scale_limit=0.1, rotate_limit=10, p=0.3)
     ], p=p)
 
 
@@ -103,13 +126,19 @@ def augment_pil_image(img, shadow_images=None, do_warp_persp=False):
     :return: PIL image
         augmented image
     """
+
+    img = Image.open("/home/alex/Downloads/antidote.jpg")
+
     use_albu = True
     transform = albu_transform(p=1)
-    if use_albu: # TODO pil to numpy
+    if use_albu:
+        img = img.convert('RGB')
+        img = np.array(img)
+        img = img[:, :, ::-1].copy()
         data = {"image": img}
         augmented = transform(**data)
         img = augmented["image"]
-        # TODO numpy to pil
+        img = Image.fromarray(img)
 
     # change the coloration, sharpness, and composite a shadow
     factor = random.uniform(0.5, 2.0)
