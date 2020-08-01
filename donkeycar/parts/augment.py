@@ -111,7 +111,7 @@ def albu_transform(p=1):
             GaussNoise(),
             ISONoise()
         ], p=0.2),
-        ShiftScaleRotate(shift_limit=0.1, scale_limit=0.1, rotate_limit=10, p=0.3)
+        #ShiftScaleRotate(shift_limit=0.1, scale_limit=0.1, rotate_limit=10, p=0.3)
     ], p=p)
 
 
